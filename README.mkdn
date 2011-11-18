@@ -6,7 +6,7 @@ vim-hacks source for emacs anything.
 
 Inspired by [mattn/unite-vim_hacks](https://github.com/mattn/unite-vim_hacks)
 
-![anything sources](./images/ui-anything.jpg)
+![anything sources](https://cacoo.com/diagrams/3RzJjEbw14y5S85g-F6F0B.png)
 
 ## LICENSE
 
