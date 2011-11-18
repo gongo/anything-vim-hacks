@@ -1,0 +1,11 @@
+# anything-vim-hacks
+
+vim-hacks source for emacs anything.
+
+## Overview
+
+Inspired by [mattn/unite-vim_hacks](https://github.com/mattn/unite-vim_hacks)
+
+## LICENSE
+
+This project is licensed under the MAHALO License. See LICENSE for details.
