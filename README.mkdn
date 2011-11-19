@@ -8,6 +8,39 @@ Inspired by [mattn/unite-vim_hacks](https://github.com/mattn/unite-vim_hacks)
 
 ![anything sources](https://cacoo.com/diagrams/3RzJjEbw14y5S85g-F6F0B.png)
 
+## Requirement
+
+- [Vim Hacks Project](http://vim-users.jp/vim-hacks-project/) の HTML 構造
+- [anything.el](http://www.emacswiki.org/emacs/Anything)
+
+## Usage
+
+`M-x vim-hacks:anything` を実行すると、Vim Hacks を anything を使って表示します。
+目的の Hack で Enter を押すと、その Hack ページがブラウザで表示されます。
+
+### キャッシュ
+
+`vim-hacks:anything` の初回起動時、取得した vim hacks はキャッシュされ、Emacs 終了時まで生きます。
+
+Vim Hack Project ページが更新されたときや、なんとなく再取得したい場合は
+`M-x vim-hacks:anything-refresh` を行うと、Vim Hacks Project から
+一覧を取得し、キャッシュを再構築します。
+
+## Setting
+
+### 日付降順で表示
+
+デフォルトでは時系列に昇順(古い順)に表示されます。
+
+降順(新しい順)で表示するには `vim-hacks:list-reverse?` に `nil` 以外をセットします。
+
+    (setq vim-hacks:list-reverse? t)
+
+この状態で `M-x vim-hacks:anything` を実行すると、以下のように表示されます。
+
+
+![anything sources reverse](https://cacoo.com/diagrams/3RzJjEbw14y5S85g-8E516.png)
+
 ## LICENSE
 
 This project is licensed under the MAHALO License. See LICENSE for details.
