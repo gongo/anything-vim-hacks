@@ -73,3 +73,10 @@
      (action
       ("Open Browser" . (lambda (x) (browse-url x))))
      )))
+
+
+(defun vim-hacks:anything-refresh ()
+  (interactive)
+  (setq vim-hacks:cache '())
+  (vim-hacks:anything))
+
