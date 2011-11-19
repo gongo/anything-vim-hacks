@@ -7,8 +7,8 @@
 (defconst vim-hacks:url "http://vim-users.jp/vim-hacks-project/"
   "URL of Vim Hacks Project")
 
-(defconst vim-hacks:list-reverse nil
-  "If not nil and not t, display list in reverse order.")
+(defconst vim-hacks:list-reverse? nil
+  "If not nil, display list in reverse order.")
 
 (defvar vim-hacks:cache '()
   "Cache which stores vim hacks list obtained by `vim-hacks:get-hacks'")
@@ -59,7 +59,8 @@
 (defun vim-hacks:get-hacks ()
   (if (= (safe-length vim-hacks:cache) 0)
       (setq vim-hacks:cache (vim-hacks:get-hacks-from-http)))
-  vim-hacks:cache)
+  (if vim-hacks:list-reverse? (reverse vim-hacks:cache)
+    vim-hacks:cache))
 
 ;;------------------------------
 ;; User Function
