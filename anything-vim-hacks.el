@@ -62,11 +62,13 @@
       (goto-char (point-min))
       (while (re-search-forward "^" nil t)
         (replace-match indent nil nil))
-      (goto-char (point-max))
       (buffer-string))))
 
 (defun vim-hacks:view-strong (node)
   (concat "*" (caddr node) "*"))
+
+(defun vim-hacks:view-italic (node)
+  (concat "_" (caddr node) "_"))
 
 (defun vim-hacks:view-list (node level)
   (let* ((type (xml-node-name node))
@@ -84,6 +86,26 @@
 
      (if (eq level 0) "\n"))))
 
+(defun vim-hacks:view-dl (node level)
+  "\n<dl> is not supported\n")
+  ;; (let ((item (remove-if (lambda (x) (stringp x)) (cddr node)))
+  ;;       (title-format "- %s ::\n")
+  ;;       (desc-format  "  %s\n")
+  ;;       (html "\n")
+  ;;       dt dd )
+  ;;   (while item
+  ;;     (setq dt (nth 2 (car item)))
+  ;;     (setq item (cdr item))
+  ;;     (setq html (concat html (format title-format dt) "\n"))
+
+  ;;     (while (eq (caar item) 'dd)
+  ;;       (setq dd (car item))
+  ;;       (setq html (concat html
+  ;;                          (format desc-format
+  ;;                                  (vim-hacks:view-tree-scan dd (+ 1 level)))))
+  ;;       (setq item (cdr item))))
+  ;;   html))
+
 (defun vim-hacks:view-code (node)
   "\
 <code> 及び <kbd> を表示する。
@@ -94,6 +116,28 @@
     (if (listp code)
         (setq code (caddr code)))
     (concat "`" code "`")))
+
+(defun vim-hacks:view-table (node level)
+  (if (require 'org-table nil t)
+      (let ((indent (concat (vim-hacks:view-param-indent level) "|")))
+        (with-temp-buffer
+          (erase-buffer)
+          (insert
+           (mapconcat
+            (lambda (tr)
+              (mapconcat (lambda (td) (nth 2 td)) (xml-get-children tr 'td) "|"))
+            (xml-get-children node 'tr) "|\n-\n"))
+          (insert "|")
+          (goto-char (point-min))
+          (while (re-search-forward "^" nil t)
+            (replace-match indent nil nil))
+          (forward-line -1)
+          (orgtbl-ctrl-c-ctrl-c nil)
+          (goto-char (point-min))
+          (newline)
+          (buffer-string)))
+    "<table> is not supported"
+    ))
 
 (defun vim-hacks:view-tree-scan (root level)
   (mapconcat
@@ -117,6 +161,8 @@
                      (vim-hacks:view-h2 x))
                     ((eq node-name 'h3)
                      (vim-hacks:view-h3 x))
+                    ((eq node-name 'dl)
+                     (vim-hacks:view-dl x level))
                     ((eq node-name 'pre)
                      (let ((code (xml-get-children x 'code)))
                        (if code
@@ -125,6 +171,12 @@
                      (vim-hacks:view-code x))
                     ((eq node-name 'strong)
                      (vim-hacks:view-strong x))
+                    ((or (eq node-name 'i) (eq node-name 'var))
+                     (vim-hacks:view-italic x))
+                    ((eq node-name 'table)
+                     (vim-hacks:view-table x level))
+                    ((eq node-name 'br)
+                     "\n")
                     )))))
    root ""))
 
@@ -165,8 +217,14 @@
         (xml-get-children (car (xml-parse-region begin end)) 'li))))))
 
 (defun vim-hacks:parse-hack ()
+  "\
+</ttr> to </tr>
+  http://vim-users.jp/2011/03/hack209/ で </ttr> が存在して xml-parse に失敗するので
+"
   (vim-hacks:parse-http-get-response
    (lambda ()
+     (replace-string "</ttr>" "</tr>" nil (point-min) (point-max))
+     (goto-char (point-min))
      (let (begin end)
        (search-forward "<div class=\"textBody\">" nil t)
        (setq begin (point))
