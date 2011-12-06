@@ -30,8 +30,8 @@
   (make-string (* 4 level) ? ))
 
 (defun vim-hacks:view-string (str)
-  "文字の前後にある白文字を削除して返す"
-  (replace-regexp-in-string "^\\s-+\\|\\s-+$" "" str))
+  "文字の前後にある空白文字及び改行を削除して返す"
+  (replace-regexp-in-string "\\`\\(?:\\s-\\|\n\\)+\\|\\(?:\\s-\\|\n\\)+\\'" "" str))
 
 (defun vim-hacks:view-a (node)
   (concat "[" (caddr node) "]" "(" (xml-get-attribute node 'href) ")"))
@@ -39,16 +39,18 @@
 (defun vim-hacks:view-li (node level)
   "先頭ノード(liのすぐよこにくるやつ)だけはインデントをつけない"
   (let ((first (car node)))
-    (setq node (cdr node))
+    (if (stringp first)
+        (setq node (cdr node))
+      (setq first ""))
     (concat
      (vim-hacks:view-tree-scan (list first) 0)
-     (vim-hacks:view-tree-scan node (1+ level)))))
+     (vim-hacks:view-tree-scan node (+ level 1)))))
 
 (defun vim-hacks:view-h2 (node)
-  (concat "\n## " (caddr node) "\n\n"))
+  (concat "\n## " (caddr node) "\n"))
 
 (defun vim-hacks:view-h3 (node)
-  (concat "\n### " (caddr node) "\n\n"))
+  (concat "\n### " (caddr node) "\n"))
 
 (defun vim-hacks:view-img (node)
   (concat "![" (xml-get-attribute node 'alt) "](" (xml-get-attribute node 'src) ")"))
@@ -57,11 +59,13 @@
   (let ((indent (vim-hacks:view-param-indent (+ 1 level))))
     (with-temp-buffer
       (erase-buffer)
-      (newline)
-      (insert (caddr node))
+      (insert (vim-hacks:view-string (caddr node)))
       (goto-char (point-min))
+      (newline)
       (while (re-search-forward "^" nil t)
         (replace-match indent nil nil))
+      (goto-char (point-max))
+      (newline)
       (buffer-string))))
 
 (defun vim-hacks:view-strong (node)
@@ -87,24 +91,25 @@
      (if (eq level 0) "\n"))))
 
 (defun vim-hacks:view-dl (node level)
-  "\n<dl> is not supported\n")
-  ;; (let ((item (remove-if (lambda (x) (stringp x)) (cddr node)))
-  ;;       (title-format "- %s ::\n")
-  ;;       (desc-format  "  %s\n")
-  ;;       (html "\n")
-  ;;       dt dd )
-  ;;   (while item
-  ;;     (setq dt (nth 2 (car item)))
-  ;;     (setq item (cdr item))
-  ;;     (setq html (concat html (format title-format dt) "\n"))
+  ;; "\n<dl> is not supported\n")
+  (let* ((item (remove-if (lambda (x) (stringp x)) (cddr node)))
+         (indent (vim-hacks:view-param-indent level))
+         (title-format (concat indent "- %s ::\n"))
+         (desc-format  (concat indent "  %s\n"))
+         (html "\n")
+         dt dd)
+    (while item
+      (setq dt (nth 2 (car item)))
+      (setq item (cdr item))
+      (setq html (concat html (format title-format dt)))
 
-  ;;     (while (eq (caar item) 'dd)
-  ;;       (setq dd (car item))
-  ;;       (setq html (concat html
-  ;;                          (format desc-format
-  ;;                                  (vim-hacks:view-tree-scan dd (+ 1 level)))))
-  ;;       (setq item (cdr item))))
-  ;;   html))
+      (while (eq (caar item) 'dd)
+        (setq dd (car item))
+        (setq html (concat html
+                           (format desc-format
+                                   (vim-hacks:view-tree-scan dd 0))))
+        (setq item (cdr item))))
+    html))
 
 (defun vim-hacks:view-code (node)
   "\
@@ -143,8 +148,7 @@
   (mapconcat
    (lambda (x)
      (cond ((stringp x)
-            (concat (make-string (* 4 level) ? )
-                    (vim-hacks:view-string x)))
+            (concat (vim-hacks:view-param-indent level) (vim-hacks:view-string x)))
            ((listp x)
             (let ((node-name (xml-node-name x)))
               (cond ((eq node-name 'p)
@@ -249,7 +253,7 @@
   (vim-hacks:parse-hack))
 
 (defun vim-hacks:view (url)
-  (insert (vim-hacks:view-tree-scan (vim-hacks:get-view-from-http url) 0)))
+  (vim-hacks:view-tree-scan (vim-hacks:get-view-from-http url) 0))
 
 ;;------------------------------
 ;; User Function
@@ -270,3 +274,5 @@
   (interactive)
   (setq vim-hacks:cache '())
   (vim-hacks:anything))
+
+(provide 'anything-vim-hacks)
