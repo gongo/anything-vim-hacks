@@ -6,7 +6,7 @@ vim-hacks source for emacs anything.
 
 Inspired by [mattn/unite-vim_hacks](https://github.com/mattn/unite-vim_hacks)
 
-![anything sources](https://cacoo.com/diagrams/3RzJjEbw14y5S85g-F6F0B.png)
+![anything sources](http://img.f.hatena.ne.jp/images/fotolife/g/gongoZ/20111119/20111119005929.jpg)
 
 ## Requirement
 
@@ -39,7 +39,7 @@ Vim Hack Project ページが更新されたときや、なんとなく再取得
 この状態で `M-x vim-hacks:anything` を実行すると、以下のように表示されます。
 
 
-![anything sources reverse](https://cacoo.com/diagrams/3RzJjEbw14y5S85g-8E516.png)
+![anything sources reverse](http://img.f.hatena.ne.jp/images/fotolife/g/gongoZ/20140214/20140214075546.png)
 
 ## LICENSE
 
